@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Inpainting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Inpaint Your Image</h1>
+        </div>
+
+        <div class="form-box">
+            <div class="form-and-example">
+
+                <!-- Left Side: Upload Form -->
+                <form method="post" enctype="multipart/form-data" class="upload-form">
+                    <div class="form-group">
+                        <label for="image">Upload Image:</label>
+                        <input type="file" name="image" accept="image/*" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="threshold">Threshold (0-255):</label>
+                        <input type="number" name="threshold" min="0" max="255" value="20">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kernel_dim">Kernel Dimension (e.g., 1, 3, 5):</label>
+                        <input type="number" name="kernel_dim" min="1" value="5">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit">Inpaint</button>
+                    </div>
+                </form>
+
+                <!-- Right Side: Example Preview -->
+                <div class="example-preview">
+                    <h2>Example Preview</h2>
+                    <img id="exampleImage" src="{{ url_for('static', filename='images/example_before.jpg') }}" alt="Example Image">
+                    <p>Click the image to see After Inpainting</p>
+                </div>
+
+            </div>
+        </div>
+
+        {% if original and result %}
+        <div class="results">
+            <div class="image-container">
+                <h2>Original Image</h2>
+                <img src="/{{ original }}" alt="Original Image">
+            </div>
+
+            <div class="image-container">
+                <h2>Inpainted Image</h2>
+                <img id="inpaintedImage" src="/{{ result }}" alt="Inpainted Image">
+                <br>
+                <button class="download-button" onclick="downloadImage()">Download Inpainted Image</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Copyright Section -->
+    <div class="copyright">
+        <p>&copy; 2025 www.inpaintyourimage.com. All Rights Reserved.</p>
+    </div>
+
+    <script>
+    // Toggle Example Image
+    const exampleImg = document.getElementById('exampleImage');
+    let showingBefore = true;
+
+    exampleImg.addEventListener('click', function() {
+        if (showingBefore) {
+            exampleImg.src = "{{ url_for('static', filename='images/example_after.jpg') }}";
+        } else {
+            exampleImg.src = "{{ url_for('static', filename='images/example_before.jpg') }}";
+        }
+        showingBefore = !showingBefore;
+    });
+
+    // Download and Toast functionality
+    function downloadImage() {
+        const imageUrl = document.getElementById('inpaintedImage').src;
+        const fileName = prompt("Enter file name to save:", "inpainted-image");
+
+        if (fileName) {
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success toast
+            showToast("✅ Downloaded Successfully!");
+        }
+    }
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 2000);
+    }
+    </script>
+</body>
+</html>
